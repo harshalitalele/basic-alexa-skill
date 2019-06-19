@@ -45,10 +45,12 @@ const LocationIntentHandler = {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         var saveObj = sessionAttributes.saveObj;
         const speechText = 'You want to save ' + saveObj + ' at location ' + locObj;
-        return handlerInput.responseBuilder
+        var response = handlerInput.responseBuilder
             .speak(speechText)
-            .reprompt('add a reprompt if you want to keep the session open for the user to respond')
+            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
             .getResponse();
+            response.shouldEndSession = false;
+        return response;
     }
 };
 const HelpIntentHandler = {
