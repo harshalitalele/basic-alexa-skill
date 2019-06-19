@@ -2,37 +2,16 @@
 // Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
 // session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
-const Util = require('util.js');
-var storage = {},
-    lastTitle = null;
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
     },
     handle(handlerInput) {
-        const speechText = 'Welcome, say Store and your thing title for me to remember it or say Find and thing title to look for it';
+        const speechText = 'Welcome, you can say Save or Location. Which would you like to try?';
         return handlerInput.responseBuilder
             .speak(speechText)
             .reprompt(speechText)
-            .getResponse();
-    }
-};
-const SearchIntentHandler = {
-    canHandle(handlerInput) {
-        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'SearchIntent';
-    },
-    handle(handlerInput) {
-        var objToSearch = handlerInput.requestEnvelope.request.intent.slots.Object.value,
-            detailsFound = storage[objToSearch],
-            speechText = detailsFound;
-        if(!detailsFound || detailsFound === "") {
-            speechText = "No details found for " + objToSearch + ". Please try again with another thing title.";
-        }
-        return handlerInput.responseBuilder
-            .speak(speechText)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
             .getResponse();
     }
 };
@@ -42,10 +21,8 @@ const SaveIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'SaveIntent';
     },
     handle(handlerInput) {
-        var thingTitle = handlerInput.requestEnvelope.request.intent.slots.Object.value;
-        storage[thingTitle] = null;
-        var speechText = thingTitle + " title added to your personal storage. Save the details for this title by saying add details and your details";
-        lastTitle = thingTitle;
+        var obj = handlerInput.requestEnvelope.request.intent.slots.Object.value;
+        const speechText = 'you said ' + obj;
         return handlerInput.responseBuilder
             .speak(speechText)
             //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
@@ -58,10 +35,7 @@ const LocationIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'LocationIntent';
     },
     handle(handlerInput) {
-        var lastTitleDetails = handlerInput.requestEnvelope.request.intent.slots.Location.value;
-        storage[lastTitle] = lastTitleDetails;
-        var speechText = lastTitle;//"Details stored for your last title " + lastTitle;
-        lastTitle = null;
+        const speechText = 'Hello World!';
         return handlerInput.responseBuilder
             .speak(speechText)
             //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
@@ -148,7 +122,6 @@ const ErrorHandler = {
 exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
-        SearchIntentHandler,
         SaveIntentHandler,
         LocationIntentHandler,
         HelpIntentHandler,
