@@ -21,11 +21,12 @@ const SaveIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'SaveIntent';
     },
     handle(handlerInput) {
-        var obj = handlerInput.requestEnvelope.request.intent.slots.Object.value;
-        const speechText = 'you said ' + obj;
+        var saveObj = handlerInput.requestEnvelope.request.intent.slots.Object.value;
+        handlerInput.requestEnvelope.session.saveObj = saveObj;
+        const speechText = 'you said ' + saveObj;
         return handlerInput.responseBuilder
             .speak(speechText)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+            .reprompt('add a reprompt if you want to keep the session open for the user to respond')
             .getResponse();
     }
 };
@@ -35,10 +36,12 @@ const LocationIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'LocationIntent';
     },
     handle(handlerInput) {
-        const speechText = 'Hello World!';
+        var locObj = handlerInput.requestEnvelope.request.intent.slots.Object.value;
+        var saveObj = 'hardcoded saveObj';//handlerInput.requestEnvelope.session.saveObj;
+        const speechText = 'You want to save ' + saveObj + ' at location ' + locObj;
         return handlerInput.responseBuilder
             .speak(speechText)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+            .reprompt('add a reprompt if you want to keep the session open for the user to respond')
             .getResponse();
     }
 };
@@ -48,7 +51,9 @@ const HelpIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speechText = 'You can say hello to me! How can I help?';
+        //var locObj = handlerInput.requestEnvelope.request.intent.slots.Object.value;
+        var saveObj = handlerInput.requestEnvelope.session.saveObj;
+        const speechText = 'You want to save ' + saveObj + ' at location ' + 'locObj';
 
         return handlerInput.responseBuilder
             .speak(speechText)
