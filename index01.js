@@ -23,6 +23,11 @@ const SaveIntentHandler = {
     handle(handlerInput) {
         var saveObj = handlerInput.requestEnvelope.request.intent.slots.Object.value;
         handlerInput.requestEnvelope.session.saveObj = saveObj;
+        
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        sessionAttributes.saveObj = saveObj;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        
         const speechText = 'you said ' + saveObj;
         return handlerInput.responseBuilder
             .speak(speechText)
@@ -37,7 +42,8 @@ const LocationIntentHandler = {
     },
     handle(handlerInput) {
         var locObj = handlerInput.requestEnvelope.request.intent.slots.Object.value;
-        var saveObj = 'hardcoded saveObj';//handlerInput.requestEnvelope.session.saveObj;
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        var saveObj = sessionAttributes.saveObj;
         const speechText = 'You want to save ' + saveObj + ' at location ' + locObj;
         return handlerInput.responseBuilder
             .speak(speechText)
