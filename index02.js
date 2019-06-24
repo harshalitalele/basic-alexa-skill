@@ -2,7 +2,14 @@
 // Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
 // session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
-const words = ['apple', 'mango', 'cherry'];
+const funWords = ['apple', 'mango', 'cherry', 'guess', 'star', 'magic', 'flower', 'drama', 'drift', 'monkey', 'lotus', 'temple', 'gross', 'beauty', 'beast', 'zeal', 'queen', 'wrist', 'quest', 'broom', 'yeast'];
+const help = `Alright! Let me guide you through the basics of the game. Bulls and Cows is a code breaking game. When the game starts, 
+            I will think of a random 4-digit number. And I will keep it a secret. Now I will ask you to guess the secret number. You can guess a random 4-digit number and give it back to me.
+             Based on your guess, I will tell you the number of bulls and number of cows in your guess. A Cow means there is a digit in your guess, that matches a digit in my secret number, but it is not at the correct position.
+             A Bull means there is a digit in your guess, that matches a digit in my secret number, and is also at the correct position. After that you will get 10 seconds to analyze the current number and come up with another guess.
+             The process continues until you are able to guess the secret number. Would you like to listen to an example? Let us assume that I have thought of a secret code and that code is 1734.
+             Now it is your chance to guess a number. Let's say you guessed 2713. I will now analyze your response and will tell you that there is 1 bull and 1 cow.
+             And then I will give you 10 seconds to analyze the number and make the next guess and continue the process. Say ready to play the game.`
 
 function calculateBullsCows(word, guess) {
     var cnt = {
@@ -31,12 +38,12 @@ const LaunchRequestHandler = {
     },
     handle(handlerInput) {
         var randomIndex = Math.floor(Math.random()*3),
-            wordLen = words[randomIndex].length;
+            wordLen = funWords[randomIndex].length;
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.currentIndex = randomIndex;
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         
-        const speechText = 'Welcome, I have picked a word for you. Guess a ' + wordLen + 'lettered word to proceed with the game.';
+        const speechText = 'Welcome, I have picked a word for you. Guess a ' + wordLen + ' lettered word to proceed with the game. Say help to listen to the instructions on how to play.';
         return handlerInput.responseBuilder
             .speak(speechText)
             .reprompt('Guess a ' + wordLen + 'lettered word to proceed with the game.')
@@ -52,12 +59,18 @@ const CheckIntentHandler = {
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         let guessedWord = handlerInput.requestEnvelope.request.intent.slots.Word.value,
             currentIndex = sessionAttributes.currentIndex,
-            myword = words[currentIndex],
+            myword = funWords[currentIndex],
             bnc = calculateBullsCows(myword, guessedWord),
             msg = "";
+            
+            if(currentIndex === null) {
+                // return a message saying say ready to start the game or call launch method
+            }
         
         if(bnc.b === myword.length) {
-            msg = "Congratulations! You guessed word correctly";
+            sessionAttributes.currentIndex = null;
+            handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+            msg = "Congratulations! You guessed word correctly. To continue with the new game, say ready.";
         }
             
         const speechText = bnc.b + ' bulls and ' + bnc.c + ' cows. ' + msg ;
@@ -67,16 +80,22 @@ const CheckIntentHandler = {
             .getResponse();
     }
 };
-const ChangeIntentHandler = {
+const StartGameIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'ChangeIntent';
+            && handlerInput.requestEnvelope.request.intent.name === 'StartGameIntent';
     },
     handle(handlerInput) {
-        const speechText = 'Hello World!';
+        var randomIndex = Math.floor(Math.random()*3),
+            wordLen = funWords[randomIndex].length;
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        sessionAttributes.currentIndex = randomIndex;
+        handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+        
+        const speechText = 'Ok, I have picked a word for you. Guess a ' + wordLen + ' lettered word to proceed with the game.';
         return handlerInput.responseBuilder
             .speak(speechText)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+            .reprompt('Guess a ' + wordLen + 'lettered word to proceed with the game.')
             .getResponse();
     }
 };
@@ -86,7 +105,7 @@ const HelpIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speechText = 'You can say hello to me! How can I help?';
+        const speechText = help;
 
         return handlerInput.responseBuilder
             .speak(speechText)
@@ -161,7 +180,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
         CheckIntentHandler,
-        ChangeIntentHandler,
+        StartGameIntentHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
