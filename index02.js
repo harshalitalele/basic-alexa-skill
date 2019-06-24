@@ -15,7 +15,7 @@ const help = `Alright! Let me help you with the instructions on how to play the 
              The process continues until you are able to guess the secret word correctly. 
              Here's an example. 
              Let us assume that I have thought of a secret word and that word is 'VAIN'.
-             Now it is your chance to guess a word. Let's say you guessed 'VILE'. 
+             Now it is your chance to guess a word. Let's say you guessed 'VILE', so you have to say 'Count for VILE' or 'Is it VILE' or 'Check VILE'. 
              I will now analyze your response and will tell you that there is 1 bull for letter 'V' and 1 cow for letter 'I'.
              And then I will give you 10 seconds to analyze the number and make the next guess and continue the process. 
              Say ready to play the game.`
@@ -25,6 +25,7 @@ function calculateBullsCows(word, guess) {
         b: 0,
         c: 0
     };
+    guess = guess.split('');
 	for(var i in word) {
 		if(word[i] === guess[i]) {
 			guess
@@ -34,6 +35,7 @@ function calculateBullsCows(word, guess) {
 			var guesIn = guess.indexOf(word[i]);
 			if(guesIn > -1 && word[guesIn] !== word[i]) {
 				cnt.c++;
+                guess[guesIn] = '#';
 			}
 		}
 	}
@@ -46,13 +48,13 @@ const LaunchRequestHandler = {
         return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
     },
     handle(handlerInput) {
-        var randomIndex = Math.floor(Math.random()*3),
+        var randomIndex = Math.floor(Math.random()*funWords.length),
             wordLen = funWords[randomIndex].length;
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.currentIndex = randomIndex;
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         
-        const speechText = 'Welcome, I have picked a word for you. Guess a ' + wordLen + ' lettered word to proceed with the game. Say help to listen to the instructions on how to play.';
+        const speechText = 'Welcome, I have picked a word for you. Guess and say check a ' + wordLen + ' lettered word to proceed with the game. Or Say help to listen to the instructions';
         return handlerInput.responseBuilder
             .speak(speechText)
             .reprompt('Guess a ' + wordLen + 'lettered word to proceed with the game.')
@@ -86,10 +88,12 @@ const CheckIntentHandler = {
             msg = bnc.b + ' bulls and ' + bnc.c + ' cows. ';
         }
         
-        if(bnc.b === myword.length) {
+        if(bnc != null && bnc.b === mLen) {
             sessionAttributes.currentIndex = null;
             handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
             msg += "Congratulations! You guessed word correctly. To continue with the new game, say ready.";
+        } else {
+            msg += ' Make another guess.'
         }
         
         return handlerInput.responseBuilder
@@ -104,16 +108,16 @@ const StartGameIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'StartGameIntent';
     },
     handle(handlerInput) {
-        var randomIndex = Math.floor(Math.random()*3),
+        var randomIndex = Math.floor(Math.random()*funWords.length),
             wordLen = funWords[randomIndex].length;
         const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
         sessionAttributes.currentIndex = randomIndex;
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
         
-        const speechText = 'Ok, I have picked a word for you. Guess a ' + wordLen + ' lettered word to proceed with the game.';
+        const speechText = 'Ok, I have picked a word for you. Guess and say Count for a ' + wordLen + ' lettered word to proceed with the game.';
         return handlerInput.responseBuilder
             .speak(speechText)
-            .reprompt('Guess a ' + wordLen + 'lettered word to proceed with the game.')
+            .reprompt('Guess and say Check a ' + wordLen + 'lettered word to proceed with the game.')
             .getResponse();
     }
 };
