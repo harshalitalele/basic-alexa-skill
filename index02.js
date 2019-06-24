@@ -3,13 +3,22 @@
 // session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
 const funWords = ['apple', 'mango', 'cherry', 'guess', 'star', 'magic', 'flower', 'drama', 'drift', 'monkey', 'lotus', 'temple', 'gross', 'beauty', 'beast', 'zeal', 'queen', 'wrist', 'quest', 'broom', 'yeast'];
-const help = `Alright! Let me guide you through the basics of the game. Bulls and Cows is a code breaking game. When the game starts, 
-            I will think of a random 4-digit number. And I will keep it a secret. Now I will ask you to guess the secret number. You can guess a random 4-digit number and give it back to me.
-             Based on your guess, I will tell you the number of bulls and number of cows in your guess. A Cow means there is a digit in your guess, that matches a digit in my secret number, but it is not at the correct position.
-             A Bull means there is a digit in your guess, that matches a digit in my secret number, and is also at the correct position. After that you will get 10 seconds to analyze the current number and come up with another guess.
-             The process continues until you are able to guess the secret number. Would you like to listen to an example? Let us assume that I have thought of a secret code and that code is 1734.
-             Now it is your chance to guess a number. Let's say you guessed 2713. I will now analyze your response and will tell you that there is 1 bull and 1 cow.
-             And then I will give you 10 seconds to analyze the number and make the next guess and continue the process. Say ready to play the game.`
+const help = `Alright! Let me help you with the instructions on how to play the game. 
+             This Bulls and Cows is a word guessing game. When the game starts, 
+             I will think of a random w. And I will word of 4 to 7 letters and keep it a secret. 
+             Now I will ask you to guess the secret word of, say, n letters. 
+             You can guess a random n-lettered word and give it back to me.
+             Based on your guess, I will tell you the number of bulls and number of cows in your guess. 
+             A Cow means there is a letter in your guess, that matches a letter in my secret word, but it is not at the correct position.
+             A Bull means there is a letter in your guess, that matches a letter in my secret word, and is also at the correct position. 
+             After that you will get 10 seconds to analyze the word that you guessed and come up with another guess.
+             The process continues until you are able to guess the secret word correctly. 
+             Here's an example. 
+             Let us assume that I have thought of a secret word and that word is 'VAIN'.
+             Now it is your chance to guess a word. Let's say you guessed 'VILE'. 
+             I will now analyze your response and will tell you that there is 1 bull for letter 'V' and 1 cow for letter 'I'.
+             And then I will give you 10 seconds to analyze the number and make the next guess and continue the process. 
+             Say ready to play the game.`
 
 function calculateBullsCows(word, guess) {
     var cnt = {
@@ -60,23 +69,32 @@ const CheckIntentHandler = {
         let guessedWord = handlerInput.requestEnvelope.request.intent.slots.Word.value,
             currentIndex = sessionAttributes.currentIndex,
             myword = funWords[currentIndex],
-            bnc = calculateBullsCows(myword, guessedWord),
-            msg = "";
-            
-            if(currentIndex === null) {
-                // return a message saying say ready to start the game or call launch method
-            }
+            msg = '',
+            gLen = guessedWord.length,
+            mLen = myword.length,
+            bnc = null;
+        
+        if(currentIndex === null) {
+            msg = 'Say ready to start the game.';
+        } else if(gLen !== mLen) {
+            msg = guessedWord + ' is a ' + gLen + ' lettered word. You have to guess ' + mLen + ' lettered word.';
+        } else {
+            bnc = calculateBullsCows(myword, guessedWord);
+        }
+        
+        if(bnc != null) {
+            msg = bnc.b + ' bulls and ' + bnc.c + ' cows. ';
+        }
         
         if(bnc.b === myword.length) {
             sessionAttributes.currentIndex = null;
             handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-            msg = "Congratulations! You guessed word correctly. To continue with the new game, say ready.";
+            msg += "Congratulations! You guessed word correctly. To continue with the new game, say ready.";
         }
-            
-        const speechText = bnc.b + ' bulls and ' + bnc.c + ' cows. ' + msg ;
+        
         return handlerInput.responseBuilder
-            .speak(speechText)
-            .reprompt('tell me another word')
+            .speak(msg)
+            .reprompt('Tell me another word')
             .getResponse();
     }
 };
